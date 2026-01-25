@@ -1,0 +1,13 @@
+{
+  "appId": "com.school.laterecord",
+  "appName": "سجل الطلاب",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
