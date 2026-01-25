@@ -98,7 +98,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
             <div className="text-center p-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
               <AlertCircle className="mx-auto text-gray-400 mb-2" size={32} />
               <p className="text-gray-500">لا توجد صفوف دراسية.</p>
-              <p className="text-sm text-gray-400 mt-1">قم بإضافة الصفوف من تبويب "الطلاب" > "الهيكل المدرسي"</p>
+              <p className="text-sm text-gray-400 mt-1">قم بإضافة الصفوف من تبويب "الطلاب" &gt; "الهيكل المدرسي"</p>
             </div>
           ) : null}
           
