@@ -19,7 +19,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records 
   return (
     <div className="p-4 space-y-6 pb-20">
       {/* Header Card */}
-      <div className="bg-gradient-to-l from-primary to-blue-700 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+      <div className="fixed md:sticky top-0 z-40 md:z-30 bg-[#1e3a8a] text-white shadow-lg px-4 pt-[env(safe-area-inset-top)] pb-6 transition-all duration-300 rounded-b-[2.5rem] md:rounded-none md:shadow-md w-full md:w-auto left-0 right-0 md:left-auto md:right-auto">
         
         {/* Background Decorative Circles */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 pointer-events-none"></div>
