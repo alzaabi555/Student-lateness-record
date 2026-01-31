@@ -6,6 +6,7 @@ import { RegisterView } from './components/RegisterView';
 import { ReportsView } from './components/ReportsView';
 import { StudentsView } from './components/StudentsView';
 import { SettingsView } from './components/SettingsView';
+import { LateTable } from './components/LateTable'; // Import if needed for direct usage in Home, but usually inside HomeView
 
 const DEFAULT_SETTINGS: AppSettings = {
   schoolName: 'مدرسة الإبداع للتعليم الأساسي',
@@ -60,6 +61,8 @@ const App: React.FC = () => {
   // --- Handlers ---
   const handleAddRecords = (newStudents: Student[]) => {
     const todayStr = new Date().toLocaleDateString('en-CA');
+    const currentTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
     const newRecords: LateRecord[] = newStudents.map(s => ({
       id: `rec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       studentId: s.id,
@@ -68,7 +71,12 @@ const App: React.FC = () => {
       className: s.className,
       timestamp: Date.now(),
       dateString: todayStr,
-      notes: ''
+      notes: '',
+      // New Fields Initializers
+      phone: s.phone,
+      arrivalTime: currentTime,
+      isExcused: false,
+      actionTaken: 'NONE'
     }));
     setRecords(prev => [...prev, ...newRecords]);
   };
@@ -77,6 +85,11 @@ const App: React.FC = () => {
     if(confirm('هل أنت متأكد من حذف هذا السجل؟')) {
       setRecords(prev => prev.filter(r => r.id !== id));
     }
+  };
+
+  // New Handler for Inline Updates in Table
+  const handleUpdateRecord = (id: string, updates: Partial<LateRecord>) => {
+    setRecords(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
   };
 
   const handleImportData = (data: any) => {
@@ -102,7 +115,24 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (view) {
       case 'HOME':
-        return <HomeView settings={settings} students={students} records={records} />;
+        // We pass handleUpdateRecord to HomeView to pass it down to LateTable
+        return <HomeView 
+          settings={settings} 
+          students={students} 
+          records={records}
+          // Note: We need to modify HomeView to accept onRemove and onUpdate if it renders the table directly
+          // Assuming HomeView renders LateTable, we'll pass props through it.
+          // But currently HomeView in previous context didn't have LateTable visible? 
+          // Wait, the user asked to change the app.
+          // Let's check HomeView content. It displays stats. 
+          // The table is usually in a "Daily Record" view. 
+          // Let's assume the user wants the table visible on HOME or separate.
+          // In the previous code, LateTable was used in "LateTable.tsx" but not explicitly shown in HomeView in the provided snippets.
+          // However, for a Supervisor, the Home Screen usually HAS the table of "Today's Late Students".
+          // I will update HomeView to include the LateTable for today's records.
+          onRemoveRecord={handleDeleteRecord}
+          onUpdateRecord={handleUpdateRecord}
+        />;
       case 'REGISTER':
         // Calculate IDs of students late today to prevent double entry
         const todayStr = new Date().toLocaleDateString('en-CA');
@@ -111,7 +141,7 @@ const App: React.FC = () => {
           students={students} 
           onAddRecords={handleAddRecords} 
           existingRecordIds={todayRecordIds} 
-          structure={structure} // Pass structure here
+          structure={structure} 
         />;
       case 'REPORTS':
         return <ReportsView records={records} settings={settings} onDeleteRecord={handleDeleteRecord} />;
@@ -129,7 +159,13 @@ const App: React.FC = () => {
           onImport={handleImportData} onClearData={handleClearData} 
         />;
       default:
-        return <HomeView settings={settings} students={students} records={records} />;
+        return <HomeView 
+          settings={settings} 
+          students={students} 
+          records={records} 
+          onRemoveRecord={handleDeleteRecord}
+          onUpdateRecord={handleUpdateRecord}
+        />;
     }
   };
 
@@ -137,7 +173,8 @@ const App: React.FC = () => {
     // Changed to dark background for "out of app" feel on desktop, strict mobile width
     <div className="min-h-screen bg-gray-900 flex justify-center overflow-hidden">
       {/* max-w-md forces the mobile phone width approx 448px */}
-      <div className="w-full max-w-md bg-gray-50 h-[100dvh] relative shadow-2xl flex flex-col">
+      {/* Added pt-safe to push content down from the notch */}
+      <div className="w-full max-w-md bg-gray-50 text-gray-900 h-[100dvh] relative shadow-2xl flex flex-col pt-safe">
         
         {/* Main Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto pb-safe scrollbar-hide">

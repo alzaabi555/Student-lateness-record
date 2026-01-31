@@ -3,7 +3,10 @@ export interface Student {
   name: string;
   grade: string; // e.g., "الصف الخامس"
   className: string; // e.g., "5/أ"
+  phone?: string; // New: Parent phone number
 }
+
+export type ActionType = 'NONE' | 'WARNING' | 'PLEDGE' | 'CALL' | 'SUMMON' | 'COUNCIL';
 
 export interface LateRecord {
   id: string;
@@ -11,23 +14,27 @@ export interface LateRecord {
   studentName: string;
   grade: string;
   className: string;
-  timestamp: number; // For sorting and ID
-  dateString: string; // For filtering e.g., "2023-10-25"
+  timestamp: number;
+  dateString: string;
   notes: string;
+  // New Fields
+  arrivalTime?: string; // e.g. "07:30"
+  isExcused?: boolean; // Has medical/transport excuse
+  actionTaken?: ActionType;
+  phone?: string; // Snapshot of phone at time of record
 }
 
 export interface AppSettings {
   schoolName: string;
   managerName: string;
   supervisorName: string;
-  logoDataUrl?: string; // New optional field for Base64 image
+  logoDataUrl?: string;
 }
 
-// New Interface for managing the structure (Grades & Classes)
 export interface GradeLevel {
   id: string;
-  name: string; // e.g. "الصف الخامس"
-  classes: string[]; // e.g. ["1", "2", "أ", "ب"]
+  name: string;
+  classes: string[];
 }
 
 export type ViewState = 'HOME' | 'STUDENTS' | 'REGISTER' | 'REPORTS' | 'SETTINGS';

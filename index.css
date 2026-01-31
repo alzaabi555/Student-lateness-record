@@ -8,6 +8,11 @@
     -webkit-tap-highlight-color: transparent;
     font-family: 'Tajawal', sans-serif;
   }
+
+  /* Fix input visibility issues: Force dark text on inputs and placeholders */
+  input, select, textarea {
+    @apply text-gray-900 placeholder:text-gray-400 bg-white;
+  }
 }
 
 /* تحسين شريط التمرير */
@@ -22,74 +27,99 @@
   border-radius: 10px;
 }
 
-/* قواعد الطباعة لضمان ظهور التقارير بشكل احترافي على ورق A4 */
+/* دعم شاشات النوتش في الجوال */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* =========================================
+   قواعد الطباعة المحسنة للجوال والويب
+   ========================================= */
 @media print {
   @page {
     size: A4 portrait;
     margin: 10mm;
   }
 
-  /* تهيئة الجسم للطباعة */
+  /* 1. إعادة تعيين الحاويات الرئيسية */
   body, html, #root {
-    width: 210mm !important; /* عرض ورقة A4 */
+    width: 100% !important;
     height: auto !important;
-    background: white !important;
-    color: black !important;
+    min-height: auto !important;
     overflow: visible !important;
+    background-color: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
     display: block !important;
   }
 
-  /* إخفاء العناصر غير المطلوبة في الطباعة */
+  /* 2. إلغاء خاصية التمرير (Scroll) من حاوية التطبيق */
+  /* هذا هو السبب الرئيسي لعدم طباعة كامل الصفحات في الجوال */
+  .overflow-y-auto, .overflow-hidden, .h-\[100dvh\], .max-w-md {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    max-width: none !important;
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+  }
+
+  /* 3. إخفاء عناصر الواجهة غير الضرورية للتقرير */
   .no-print, 
-  button, 
   nav, 
+  button,
   .fixed, 
-  .absolute.bottom-0,
-  [role="navigation"] {
+  .sticky,
+  [role="navigation"],
+  footer,
+  aside {
     display: none !important;
   }
 
-  /* إلغاء قيود العرض الخاصة بالجوال عند الطباعة */
-  .max-w-md, .w-full {
-    max-width: none !important;
-    width: 100% !important;
-    box-shadow: none !important;
-    background: white !important;
-    position: relative !important;
-    height: auto !important;
-  }
-
-  /* تحسين الجداول للطباعة */
+  /* 4. تحسين الجدول */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
-    color: black !important;
-    table-layout: auto !important;
+    page-break-inside: auto;
+  }
+  
+  thead {
+    display: table-header-group;
+  }
+  
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
   }
 
   th, td {
     border: 1px solid #000 !important;
-    padding: 6px 4px !important;
-    color: black !important;
-    background: transparent !important;
-    font-size: 11pt !important;
+    color: #000 !important;
+    padding: 8px !important;
+    font-size: 12pt !important;
   }
 
-  /* إجبار النصوص السوداء */
-  .text-gray-900, .text-gray-800, .text-gray-700, .text-primary {
-    color: black !important;
-  }
-
-  /* عرض العناصر المخصصة للطباعة فقط */
+  /* 5. إظهار العناصر المخفية افتراضياً والمخصصة للطباعة */
   .print-only {
     display: block !important;
   }
+
+  /* 6. تحسينات النصوص */
+  h1, h2, h3, p, span, div {
+    color: #000 !important;
+    text-shadow: none !important;
+  }
   
-  /* الحفاظ على جودة الصور (الشعار) */
+  /* الحفاظ على جودة الشعار */
   img {
     max-height: 80px !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
+    visibility: visible !important;
   }
 }
 
@@ -105,9 +135,4 @@
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
-}
-
-/* دعم شاشات النوتش في الجوال */
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom);
 }
