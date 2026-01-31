@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Student, LateRecord, AppSettings, ViewState, GradeLevel } from './types';
-import { BottomNav } from './components/BottomNav';
-import { HomeView } from './components/HomeView';
-import { RegisterView } from './components/RegisterView';
-import { ReportsView } from './components/ReportsView';
-import { StudentsView } from './components/StudentsView';
-import { SettingsView } from './components/SettingsView';
+import { Student, LateRecord, AppSettings, ViewState, GradeLevel } from './types.ts';
+import { BottomNav } from './components/BottomNav.tsx';
+import { HomeView } from './components/HomeView.tsx';
+import { RegisterView } from './components/RegisterView.tsx';
+import { ReportsView } from './components/ReportsView.tsx';
+import { StudentsView } from './components/StudentsView.tsx';
+import { SettingsView } from './components/SettingsView.tsx';
 
 const DEFAULT_SETTINGS: AppSettings = {
   schoolName: 'مدرسة الإبداع للتعليم الأساسي',
