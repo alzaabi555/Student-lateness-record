@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { LateRecord, AppSettings } from '../types.ts';
+import { LateRecord, AppSettings } from '../types';
 import { Printer, CalendarDays, Calendar, Trash2, Filter } from 'lucide-react';
 
 interface ReportsViewProps {
@@ -177,8 +177,10 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ records, settings, onD
         </div>
       </div>
 
+      {/* Printable Area - ID used by CSS to show ONLY this div on print */}
       <div id="printable-area" className="bg-white">
         
+        {/* Print Header */}
         <div className="text-center border-b-2 border-gray-800 pb-4 mb-4">
           <div className="flex justify-between items-center px-4 mb-2">
              <div className="text-right">
@@ -197,6 +199,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ records, settings, onD
           <h2 className="text-base font-medium text-gray-700">{settings.schoolName}</h2>
         </div>
 
+        {/* ===================== FREQUENT TABLE ===================== */}
         {reportType === 'FREQUENT' ? (
           <div className="w-full">
             <table className="w-full border-collapse text-xs md:text-sm">
@@ -233,6 +236,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ records, settings, onD
             </table>
           </div>
         ) : (
+          /* ===================== DAILY / MONTHLY TABLE ===================== */
           <div className="w-full">
             <table className="w-full border-collapse text-xs md:text-sm">
               <thead>
@@ -276,6 +280,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ records, settings, onD
           </div>
         )}
 
+        {/* Print Footer */}
         <div className="mt-10 flex justify-between items-end pt-8">
            <div className="text-center w-1/3">
              <p className="font-bold mb-8">مشرف السجل</p>
