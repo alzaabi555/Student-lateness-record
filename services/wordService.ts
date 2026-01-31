@@ -1,5 +1,5 @@
 import mammoth from 'mammoth';
-import { Student } from '../types.ts';
+import { Student } from '../types';
 
 export const parseWordFile = async (file: File): Promise<Student[]> => {
   return new Promise(async (resolve, reject) => {
@@ -77,13 +77,13 @@ export const parseWordFile = async (file: File): Promise<Student[]> => {
            const phoneMatch = text.match(/(\d{8,})/);
 
            if (nameMatch && phoneMatch) {
-              students.push({
-                id: `std-word-p-${Date.now()}-${Math.random()}`,
-                name: nameMatch[0].trim(),
-                grade: '',
-                className: '',
-                phone: phoneMatch[0].trim()
-              });
+             students.push({
+               id: `std-word-p-${Date.now()}-${Math.random()}`,
+               name: nameMatch[0].trim(),
+               grade: '',
+               className: '',
+               phone: phoneMatch[0].trim()
+             });
            }
         });
       }
