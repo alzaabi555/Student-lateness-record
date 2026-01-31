@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Student, LateRecord, AppSettings, ViewState, GradeLevel } from './types.ts';
+import { Student, LateRecord, AppSettings, ViewState, GradeLevel } from './types';
 import { BottomNav } from './components/BottomNav';
 import { HomeView } from './components/HomeView';
 import { RegisterView } from './components/RegisterView';
 import { ReportsView } from './components/ReportsView';
 import { StudentsView } from './components/StudentsView';
 import { SettingsView } from './components/SettingsView';
-import { LateTable } from './components/LateTable'; // Import if needed for direct usage in Home, but usually inside HomeView
+import { LateTable } from './components/LateTable'; 
 
 const DEFAULT_SETTINGS: AppSettings = {
   schoolName: 'مدرسة الإبداع للتعليم الأساسي',
@@ -115,21 +115,10 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (view) {
       case 'HOME':
-        // We pass handleUpdateRecord to HomeView to pass it down to LateTable
         return <HomeView 
           settings={settings} 
           students={students} 
           records={records}
-          // Note: We need to modify HomeView to accept onRemove and onUpdate if it renders the table directly
-          // Assuming HomeView renders LateTable, we'll pass props through it.
-          // But currently HomeView in previous context didn't have LateTable visible? 
-          // Wait, the user asked to change the app.
-          // Let's check HomeView content. It displays stats. 
-          // The table is usually in a "Daily Record" view. 
-          // Let's assume the user wants the table visible on HOME or separate.
-          // In the previous code, LateTable was used in "LateTable.tsx" but not explicitly shown in HomeView in the provided snippets.
-          // However, for a Supervisor, the Home Screen usually HAS the table of "Today's Late Students".
-          // I will update HomeView to include the LateTable for today's records.
           onRemoveRecord={handleDeleteRecord}
           onUpdateRecord={handleUpdateRecord}
         />;
