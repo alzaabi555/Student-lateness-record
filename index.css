@@ -37,89 +37,71 @@
 }
 
 /* =========================================
-   قواعد الطباعة المحسنة للجوال والويب
+   قواعد الطباعة المحسنة (Fixed)
    ========================================= */
 @media print {
-  @page {
-    size: A4 portrait;
-    margin: 10mm;
+  /* 1. إخفاء كل العناصر بشكل افتراضي */
+  body * {
+    visibility: hidden;
   }
 
-  /* 1. إعادة تعيين الحاويات الرئيسية */
-  body, html, #root {
+  /* 2. إظهار منطقة الطباعة فقط ومحتوياتها */
+  #printable-area, #printable-area * {
+    visibility: visible;
+  }
+
+  /* 3. تنسيق منطقة الطباعة لتأخذ كامل الصفحة وتخرج من حاوية التطبيق */
+  #printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 100% !important;
-    height: auto !important;
-    min-height: auto !important;
-    overflow: visible !important;
+    margin: 0 !important;
+    padding: 20px !important;
     background-color: white !important;
     color: black !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: block !important;
+    z-index: 9999;
   }
 
-  /* 2. إلغاء خاصية التمرير (Scroll) من حاوية التطبيق */
-  /* هذا هو السبب الرئيسي لعدم طباعة كامل الصفحات في الجوال */
-  .overflow-y-auto, .overflow-hidden, .h-\[100dvh\], .max-w-md {
-    overflow: visible !important;
+  /* 4. إعدادات الصفحة */
+  @page {
+    size: A4 portrait;
+    margin: 5mm;
+  }
+
+  body, html {
     height: auto !important;
-    max-height: none !important;
-    max-width: none !important;
-    position: static !important;
-    transform: none !important;
-    width: 100% !important;
+    overflow: visible !important;
+    background: white !important;
   }
 
-  /* 3. إخفاء عناصر الواجهة غير الضرورية للتقرير */
-  .no-print, 
-  nav, 
-  button,
-  .fixed, 
-  .sticky,
-  [role="navigation"],
-  footer,
-  aside {
+  /* 5. إخفاء العناصر غير المرغوبة داخل منطقة الطباعة */
+  .no-print {
     display: none !important;
   }
 
-  /* 4. تحسين الجدول */
+  /* 6. تحسين الجداول والحدود */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
-    page-break-inside: auto;
+    font-size: 10pt !important;
   }
   
-  thead {
-    display: table-header-group;
-  }
-  
-  tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
-  }
-
   th, td {
     border: 1px solid #000 !important;
     color: #000 !important;
-    padding: 8px !important;
-    font-size: 12pt !important;
   }
 
-  /* 5. إظهار العناصر المخفية افتراضياً والمخصصة للطباعة */
+  /* 7. إظهار العناصر المخصصة للطباعة فقط */
   .print-only {
     display: block !important;
-  }
-
-  /* 6. تحسينات النصوص */
-  h1, h2, h3, p, span, div {
-    color: #000 !important;
-    text-shadow: none !important;
+    visibility: visible !important;
   }
   
-  /* الحفاظ على جودة الشعار */
-  img {
-    max-height: 80px !important;
-    visibility: visible !important;
+  /* إصلاح مشاكل النصوص الطويلة */
+  .break-words {
+    word-wrap: break-word;
+    white-space: normal;
   }
 }
 

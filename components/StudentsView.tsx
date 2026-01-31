@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { Student, GradeLevel } from '../types';
+import { Student, GradeLevel } from '../types.ts';
 import { Upload, Search, User, UserPlus, Layers, Plus, Trash2, X, FileSpreadsheet, FileText, Phone } from 'lucide-react';
-import { parseExcelFile } from '../services/excelService';
-import { parseWordFile } from '../services/wordService';
+import { parseExcelFile } from '../services/excelService.ts';
+import { parseWordFile } from '../services/wordService.ts';
 
 interface StudentsViewProps {
   students: Student[];
@@ -239,7 +239,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {grade.classes.map(cls => (
+                  {grade.classes.map((cls: string) => (
                     <span key={cls} className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold border border-blue-100">
                       {cls}
                       <button onClick={() => handleDeleteClass(grade.id, cls)} className="text-blue-400 hover:text-red-500">
@@ -379,7 +379,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
               </select>
               <select name="studentClass" className="w-full p-3 border rounded-lg bg-gray-50 outline-none text-gray-900">
                 <option value="">اختر الفصل...</option>
-                {modalGrade && structure.find(g => g.name === modalGrade)?.classes.map(c => <option key={c} value={c}>{c}</option>)}
+                {modalGrade && structure.find(g => g.name === modalGrade)?.classes.map((c: string) => <option key={c} value={c}>{c}</option>)}
                 <option value="1">1</option><option value="2">2</option><option value="أ">أ</option><option value="ب">ب</option>
               </select>
               <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg font-bold">حفظ</button>
@@ -427,7 +427,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
                    </select>
                    <select value={importClass} onChange={(e) => setImportClass(e.target.value)} className="w-full p-2 border rounded bg-white text-sm text-gray-900">
                      <option value="">اختر الشعبة...</option>
-                     {importGrade && structure.find(g => g.name === importGrade)?.classes.map(c => <option key={c} value={c}>{c}</option>)}
+                     {importGrade && structure.find(g => g.name === importGrade)?.classes.map((c: string) => <option key={c} value={c}>{c}</option>)}
                    </select>
                 </div>
               )}
