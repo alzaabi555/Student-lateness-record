@@ -1,5 +1,5 @@
 import mammoth from 'mammoth';
-import { Student } from '../types';
+import { Student } from '../types.ts';
 
 export const parseWordFile = async (file: File): Promise<Student[]> => {
   return new Promise(async (resolve, reject) => {
