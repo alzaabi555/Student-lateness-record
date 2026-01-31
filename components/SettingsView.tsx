@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppSettings, Student, LateRecord } from '../types.ts';
+import { AppSettings, Student, LateRecord } from '../types';
 import { Save, Download, Upload, Trash, Image as ImageIcon, X, Loader2 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';
@@ -34,7 +34,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       const jsonString = JSON.stringify(data, null, 2);
 
       if (Capacitor.isNativePlatform()) {
-        // Native (iOS/Android): Write to cache then Share
         try {
           const result = await Filesystem.writeFile({
             path: fileName,
@@ -54,7 +53,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           alert('تعذر مشاركة الملف. تأكد من صلاحيات التطبيق.');
         }
       } else {
-        // Web: Standard Download
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -92,7 +90,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) { // 2MB Limit
+    if (file.size > 2 * 1024 * 1024) { 
       alert('حجم الصورة كبير جداً. يرجى اختيار صورة أقل من 2 ميجابايت.');
       return;
     }
@@ -112,14 +110,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     <div className="p-4 md:p-8 space-y-8 pb-24">
       <h2 className="text-xl font-bold text-gray-800 border-b pb-2">الإعدادات والبيانات</h2>
 
-      {/* General Settings */}
       <section className="space-y-4 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 className="font-bold text-gray-700 flex items-center gap-2">
           <Save size={18} />
           بيانات المدرسة
         </h3>
         
-        {/* Logo Upload Section */}
         <div className="flex flex-col items-center p-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-3 w-full text-right">شعار المدرسة</label>
           
@@ -184,7 +180,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
       </section>
 
-      {/* Backup & Restore */}
       <section className="space-y-4 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <h3 className="font-bold text-gray-700">النسخ الاحتياطي والأرشفة</h3>
         <p className="text-sm text-gray-500">قم بتنزيل نسخة كاملة من البيانات لحفظها خارجيًا.</p>
@@ -207,7 +202,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
       </section>
 
-      {/* Danger Zone */}
       <section className="space-y-4 bg-red-50 p-6 rounded-xl border border-red-100">
         <h3 className="font-bold text-red-700 flex items-center gap-2">
           <Trash size={18} />

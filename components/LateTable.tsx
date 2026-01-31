@@ -1,5 +1,5 @@
 import React from 'react';
-import { LateRecord, ActionType } from '../types.ts';
+import { LateRecord, ActionType } from '../types';
 import { Trash2, MessageCircle, Clock, CheckSquare, Square, AlertCircle } from 'lucide-react';
 
 interface LateTableProps {
@@ -32,19 +32,14 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
     }
 
     // --- منطق تحسين رقم الهاتف ---
-    // 1. إزالة أي مسافات أو شرطات أو أقواس
     let phone = record.phone.replace(/\D/g, '');
 
-    // 2. معالجة الأرقام المحلية (سلطنة عمان كمثال افتراضي بناءً على الترويسة)
-    // إذا كان الرقم 8 خانات (مثلاً 99999999)، نضيف المفتاح 968
     if (phone.length === 8 && (phone.startsWith('9') || phone.startsWith('7'))) {
         phone = '968' + phone;
     }
-    // إذا كان يبدأ بـ 00، نحذفه
     else if (phone.startsWith('00')) {
         phone = phone.substring(2);
     }
-    // إذا كان يبدأ بـ 0 محلي (مثل السعودية/مصر)، نحذف الصفر (يحتاج مفتاح دولة، هنا نتركه كما هو أو يمكن تخصيصه)
     else if (phone.startsWith('0')) {
         phone = phone.substring(1); 
     }
@@ -64,8 +59,6 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
               <th className="border border-gray-600 p-2 w-10 text-center font-bold text-gray-800">م</th>
               <th className="border border-gray-600 p-2 text-right font-bold text-gray-800">اسم الطالب</th>
               <th className="border border-gray-600 p-2 w-24 text-center font-bold text-gray-800">الصف</th>
-              
-              {/* New Operational Columns */}
               <th className="border border-gray-600 p-2 w-20 text-center font-bold text-gray-800">الوقت</th>
               <th className="border border-gray-600 p-2 w-16 text-center font-bold text-gray-800">بعذر؟</th>
               <th className="border border-gray-600 p-2 w-40 text-center font-bold text-gray-800">الإجراء المتخذ</th>
@@ -80,7 +73,6 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
                 
                 <td className="border border-gray-400 px-3 text-gray-900 font-medium">
                   {record.studentName}
-                  {/* إظهار الرقم أسفل الاسم للمشرف للتأكد */}
                   {record.phone && <span className="block text-[10px] text-gray-400 font-mono tracking-wider print:hidden">{record.phone}</span>}
                 </td>
                 
@@ -88,7 +80,6 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
                   {record.grade} ({record.className})
                 </td>
                 
-                {/* Time Input */}
                 <td className="border border-gray-400 text-center">
                   <input
                     type="time"
@@ -98,7 +89,6 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
                   />
                 </td>
 
-                {/* Excuse Toggle */}
                 <td className="border border-gray-400 text-center no-print">
                    <button 
                      onClick={() => onUpdateRecord(record.id, { isExcused: !record.isExcused })}
@@ -107,17 +97,13 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
                      {record.isExcused ? <CheckSquare size={20}/> : <Square size={20}/>}
                    </button>
                 </td>
-                {/* Printable Excuse Column */}
                 <td className="border border-gray-400 text-center print-only hidden">
                   {record.isExcused ? 'نعم' : ''}
                 </td>
 
-                {/* Action Dropdown */}
                 <td className="border border-gray-400 px-1">
-                   {/* Print View: Just Text */}
                    <span className="print-only hidden text-center w-full">{getActionLabel(record.actionTaken)}</span>
                    
-                   {/* Web View: Dropdown */}
                    <select
                      value={record.actionTaken || 'NONE'}
                      onChange={(e) => onUpdateRecord(record.id, { actionTaken: e.target.value as ActionType })}
@@ -132,7 +118,6 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
                    </select>
                 </td>
 
-                {/* Communication Button - Always visible now */}
                 <td className="border border-gray-400 text-center no-print align-middle">
                   <button 
                     onClick={() => handleWhatsApp(record)}
@@ -158,7 +143,6 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
               </tr>
             ))}
             
-            {/* Fill empty rows to maintain A4 look */}
             {emptyRows.map((_, i) => (
               <tr key={`empty-${i}`} className="h-10">
                 <td className="border border-gray-400 text-center text-gray-400 font-light">{records.length + i + 1}</td>
@@ -175,7 +159,6 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
         </table>
       </div>
 
-      {/* Footer / Signature Area */}
       <div className="mt-8 flex justify-end px-8">
         <div className="text-center">
           <p className="font-bold text-gray-800 mb-4 text-lg">يعتمد مدير المدرسة:</p>

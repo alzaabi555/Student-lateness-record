@@ -9,13 +9,11 @@
     font-family: 'Tajawal', sans-serif;
   }
 
-  /* Fix input visibility issues: Force dark text on inputs and placeholders */
   input, select, textarea {
     @apply text-gray-900 placeholder:text-gray-400 bg-white;
   }
 }
 
-/* تحسين شريط التمرير */
 ::-webkit-scrollbar {
   width: 5px;
 }
@@ -27,7 +25,6 @@
   border-radius: 10px;
 }
 
-/* دعم شاشات النوتش في الجوال */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -36,21 +33,13 @@
   padding-top: env(safe-area-inset-top);
 }
 
-/* =========================================
-   قواعد الطباعة المحسنة (Fixed)
-   ========================================= */
 @media print {
-  /* 1. إخفاء كل العناصر بشكل افتراضي */
   body * {
     visibility: hidden;
   }
-
-  /* 2. إظهار منطقة الطباعة فقط ومحتوياتها */
   #printable-area, #printable-area * {
     visibility: visible;
   }
-
-  /* 3. تنسيق منطقة الطباعة لتأخذ كامل الصفحة وتخرج من حاوية التطبيق */
   #printable-area {
     position: absolute;
     left: 0;
@@ -62,57 +51,62 @@
     color: black !important;
     z-index: 9999;
   }
-
-  /* 4. إعدادات الصفحة */
   @page {
     size: A4 portrait;
     margin: 5mm;
   }
-
   body, html {
     height: auto !important;
     overflow: visible !important;
     background: white !important;
   }
-
-  /* 5. إخفاء العناصر غير المرغوبة داخل منطقة الطباعة */
   .no-print {
     display: none !important;
   }
-
-  /* 6. تحسين الجداول والحدود */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
     font-size: 10pt !important;
   }
-  
   th, td {
     border: 1px solid #000 !important;
     color: #000 !important;
   }
-
-  /* 7. إظهار العناصر المخصصة للطباعة فقط */
   .print-only {
     display: block !important;
     visibility: visible !important;
   }
-  
-  /* إصلاح مشاكل النصوص الطويلة */
   .break-words {
     word-wrap: break-word;
     white-space: normal;
   }
 }
 
-/* أنيميشن بسيط */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounceShort {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out forwards;
+}
+
+.animate-bounce-short {
+  animation: bounceShort 2s infinite;
 }
 
 .scrollbar-hide::-webkit-scrollbar {

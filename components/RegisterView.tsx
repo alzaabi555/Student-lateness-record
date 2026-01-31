@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Student, GradeLevel } from '../types.ts';
+import { Student, GradeLevel } from '../types';
 import { ChevronRight, CheckCircle, Search, Save, AlertCircle, X, Users } from 'lucide-react';
 
 interface RegisterViewProps {
@@ -18,17 +18,14 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(new Set());
   const [classSearchTerm, setClassSearchTerm] = useState('');
   
-  // Global Search State for 1100+ students support
   const [globalSearch, setGlobalSearch] = useState('');
 
-  // 1. Get Available Grades
   const availableGrades = useMemo(() => {
     const structureGrades = structure.map(g => g.name);
     const studentGrades = students.map(s => s.grade);
     return Array.from(new Set([...structureGrades, ...studentGrades])).sort();
   }, [students, structure]);
 
-  // 2. Get Classes for selected Grade
   const availableClasses = useMemo(() => {
     if (!selectedGrade) return [];
     
@@ -42,7 +39,6 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
     return Array.from(new Set([...structClasses, ...studentClasses])).sort();
   }, [students, structure, selectedGrade]);
 
-  // 3. Get Students for selected Class
   const classStudents = useMemo(() => {
     if (!selectedClass) return [];
     return students.filter(s => 
@@ -52,7 +48,6 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
     );
   }, [students, selectedGrade, selectedClass, classSearchTerm]);
 
-  // 4. Global Search Results (limited to 50 for performance)
   const globalSearchResults = useMemo(() => {
     if (!globalSearch.trim()) return [];
     const term = globalSearch.toLowerCase();
@@ -75,7 +70,6 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
 
   const handleSave = () => {
     const studentsToAdd = students.filter(s => selectedStudentIds.has(s.id));
-    // Pass entire student objects so App.tsx can read phone numbers
     onAddRecords(studentsToAdd);
     setSelectedStudentIds(new Set());
     setGlobalSearch('');
@@ -94,7 +88,6 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
 
   return (
     <div className="p-4 pb-24">
-      {/* Header */}
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-800">تسجيل التأخير</h2>
@@ -105,7 +98,6 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
           )}
         </div>
 
-        {/* Global Search Bar - Crucial for Large DB */}
         <div className="relative z-20">
           <Search className="absolute right-3 top-3 text-gray-400" size={18} />
           <input 
@@ -130,7 +122,6 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
         </div>
       </div>
 
-      {/* ==================== GLOBAL SEARCH RESULTS ==================== */}
       {isGlobalSearchActive ? (
         <div className="space-y-3 animate-fade-in">
            <div className="flex items-center justify-between text-sm text-gray-500 px-1">
@@ -178,9 +169,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
            )}
         </div>
       ) : (
-        /* ==================== STEP WIZARD ==================== */
         <>
-          {/* STEP 1: Select Grade */}
           {step === 'GRADE' && (
             <div className="grid grid-cols-1 gap-3 animate-fade-in">
               <p className="text-gray-500 mb-1 text-sm">أو اختر الصف الدراسي:</p>
@@ -215,7 +204,6 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
             </div>
           )}
 
-          {/* STEP 2: Select Class */}
           {step === 'CLASS' && (
             <div className="space-y-4 animate-fade-in">
               <div className="text-primary font-bold text-lg border-b pb-2 flex justify-between items-center">
@@ -247,7 +235,6 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
             </div>
           )}
 
-          {/* STEP 3: Select Students */}
           {step === 'SELECT' && (
             <div className="flex flex-col h-full animate-fade-in">
               <div className="flex items-center gap-2 mb-4 bg-gray-100 p-2 rounded-lg text-sm">
@@ -308,7 +295,6 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ students, onAddRecor
         </>
       )}
 
-      {/* Floating Action Button - Visible if any students selected */}
       {selectedStudentIds.size > 0 && (
         <button
           onClick={handleSave}

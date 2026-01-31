@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Student, LateRecord, AppSettings, ViewState, GradeLevel } from './types.ts';
-import { BottomNav } from './components/BottomNav.tsx';
-import { HomeView } from './components/HomeView.tsx';
-import { RegisterView } from './components/RegisterView.tsx';
-import { ReportsView } from './components/ReportsView.tsx';
-import { StudentsView } from './components/StudentsView.tsx';
-import { SettingsView } from './components/SettingsView.tsx';
+import { Student, LateRecord, AppSettings, ViewState, GradeLevel } from './types';
+import { BottomNav } from './components/BottomNav';
+import { HomeView } from './components/HomeView';
+import { RegisterView } from './components/RegisterView';
+import { ReportsView } from './components/ReportsView';
+import { StudentsView } from './components/StudentsView';
+import { SettingsView } from './components/SettingsView';
 
 const DEFAULT_SETTINGS: AppSettings = {
   schoolName: 'مدرسة الإبداع للتعليم الأساسي',
@@ -71,7 +71,6 @@ const App: React.FC = () => {
       timestamp: Date.now(),
       dateString: todayStr,
       notes: '',
-      // New Fields Initializers
       phone: s.phone,
       arrivalTime: currentTime,
       isExcused: false,
@@ -86,7 +85,6 @@ const App: React.FC = () => {
     }
   };
 
-  // New Handler for Inline Updates in Table
   const handleUpdateRecord = (id: string, updates: Partial<LateRecord>) => {
     setRecords(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r));
   };
@@ -122,7 +120,6 @@ const App: React.FC = () => {
           onUpdateRecord={handleUpdateRecord}
         />;
       case 'REGISTER':
-        // Calculate IDs of students late today to prevent double entry
         const todayStr = new Date().toLocaleDateString('en-CA');
         const todayRecordIds = new Set(records.filter(r => r.dateString === todayStr).map(r => r.studentId));
         return <RegisterView 
@@ -158,20 +155,20 @@ const App: React.FC = () => {
   };
 
   return (
-    // Changed to dark background for "out of app" feel on desktop, strict mobile width
-    <div className="min-h-screen bg-gray-900 flex justify-center overflow-hidden">
-      {/* max-w-md forces the mobile phone width approx 448px */}
-      {/* Added pt-safe to push content down from the notch */}
-      <div className="w-full max-w-md bg-gray-50 text-gray-900 h-[100dvh] relative shadow-2xl flex flex-col pt-safe">
-        
-        {/* Main Content Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto pb-safe scrollbar-hide">
-          {renderView()}
+    <div className="min-h-screen bg-gray-100 flex flex-col text-gray-900 overflow-hidden font-sans relative">
+      
+      {/* Main Content Layer */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-gray-50">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide w-full pb-24">
+           <div className="w-full max-w-3xl mx-auto md:p-6 pt-safe">
+              {renderView()}
+           </div>
         </div>
-
-        {/* Bottom Nav - Fixed at bottom of container */}
-        <BottomNav currentView={view} setView={setView} />
       </div>
+
+      {/* Navigation Layer - Fixed at Bottom */}
+      <BottomNav currentView={view} setView={setView} />
     </div>
   );
 };

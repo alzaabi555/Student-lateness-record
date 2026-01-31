@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { AppSettings, LateRecord, Student } from '../types.ts';
+import { AppSettings, LateRecord, Student } from '../types';
 import { Clock, Users, AlertCircle, AlertTriangle } from 'lucide-react';
-import { LateTable } from './LateTable.tsx';
+import { LateTable } from './LateTable';
 
 interface HomeViewProps {
   settings: AppSettings;
@@ -44,7 +44,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records,
   }, [records]);
 
   return (
-    <div className="p-4 space-y-6 pb-20">
+    <div className="p-4 space-y-6 md:p-0">
       {/* Header Card */}
       <div className="bg-gradient-to-l from-primary to-blue-700 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         
@@ -82,8 +82,8 @@ export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records,
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-md transition-shadow">
           <div className="bg-blue-100 p-3 rounded-full mb-3 text-primary">
             <Users size={24} />
           </div>
@@ -91,7 +91,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records,
           <span className="text-2xl font-bold text-gray-800">{students.length}</span>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-md transition-shadow">
           <div className="bg-red-100 p-3 rounded-full mb-3 text-red-600">
             <AlertCircle size={24} />
           </div>
@@ -113,7 +113,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records,
             </span>
           </div>
           
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 max-h-60 overflow-y-auto">
             {frequentLatecomers.map((student, idx) => (
               <div key={idx} className="p-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-3">
@@ -143,26 +143,12 @@ export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records,
            <Clock size={20} className="text-primary"/>
            <h3 className="font-bold text-gray-800">قائمة المتأخرين اليوم ({todayRecords.length})</h3>
         </div>
-
-        {/* Hidden Header only for Print */}
-        <div className="print-only hidden p-4 text-center border-b mb-4">
-           <h1 className="text-2xl font-bold mb-1">سجل المتأخرين اليومي</h1>
-           <h2 className="text-xl text-gray-700 mb-2">{settings.schoolName}</h2>
-           <p className="text-sm text-gray-500">{dayName}، {formattedDate}</p>
-        </div>
-
-        {todayRecords.length > 0 ? (
-           <LateTable 
-             records={todayRecords} 
-             onRemove={onRemoveRecord} 
-             onUpdateRecord={onUpdateRecord}
-             managerName={settings.managerName}
-           />
-        ) : (
-          <div className="p-8 text-center text-gray-400">
-            لم يتم تسجيل أي تأخير اليوم
-          </div>
-        )}
+        <LateTable 
+          records={todayRecords} 
+          onRemove={onRemoveRecord} 
+          onUpdateRecord={onUpdateRecord}
+          managerName={settings.managerName}
+        />
       </div>
     </div>
   );

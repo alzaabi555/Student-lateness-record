@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Student } from '../types.ts';
+import { Student } from '../types';
 import { UserPlus, Filter } from 'lucide-react';
 
 interface StudentSelectorProps {
@@ -12,12 +12,10 @@ export const StudentSelector: React.FC<StudentSelectorProps> = ({ students, onAd
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  // Extract unique grades
   const grades = useMemo(() => {
     return Array.from(new Set(students.map(s => s.grade))).sort();
   }, [students]);
 
-  // Extract unique classes based on selected grade
   const classes = useMemo(() => {
     if (!selectedGrade) return [];
     return Array.from(new Set(
@@ -25,7 +23,6 @@ export const StudentSelector: React.FC<StudentSelectorProps> = ({ students, onAd
     )).sort();
   }, [students, selectedGrade]);
 
-  // Filter students based on selection
   const filteredStudents = useMemo(() => {
     return students.filter(s => {
       const matchGrade = selectedGrade ? s.grade === selectedGrade : true;
@@ -43,14 +40,13 @@ export const StudentSelector: React.FC<StudentSelectorProps> = ({ students, onAd
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        {/* Grade Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">الصف الدراسـي</label>
           <select
             value={selectedGrade}
             onChange={(e) => {
               setSelectedGrade(e.target.value);
-              setSelectedClass(''); // Reset class
+              setSelectedClass('');
             }}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:outline-none"
           >
@@ -59,7 +55,6 @@ export const StudentSelector: React.FC<StudentSelectorProps> = ({ students, onAd
           </select>
         </div>
 
-        {/* Class Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">الفصل / الشعبة</label>
           <select
@@ -73,7 +68,6 @@ export const StudentSelector: React.FC<StudentSelectorProps> = ({ students, onAd
           </select>
         </div>
 
-        {/* Search Input */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">بحث بالاسم</label>
           <input 
@@ -86,7 +80,6 @@ export const StudentSelector: React.FC<StudentSelectorProps> = ({ students, onAd
         </div>
       </div>
 
-      {/* Student List Grid */}
       <div className="mt-4 max-h-48 overflow-y-auto border border-gray-100 rounded-md bg-gray-50 p-2">
         {filteredStudents.length === 0 ? (
           <p className="text-center text-gray-500 py-4">لا توجد نتائج مطابقة</p>
