@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AppSettings, LateRecord, Student } from '../types';
-import { Clock, Calendar, Users, AlertCircle } from 'lucide-react';
+import { Clock, Users, AlertCircle, AlertTriangle } from 'lucide-react';
+import { LateTable } from './LateTable';
 
 interface HomeViewProps {
   settings: AppSettings;
   students: Student[];
   records: LateRecord[];
+  onRemoveRecord: (id: string) => void;
+  onUpdateRecord: (id: string, updates: Partial<LateRecord>) => void;
 }
 
-export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records }) => {
+export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records, onRemoveRecord, onUpdateRecord }) => {
   const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
   const todayRecords = records.filter(r => r.dateString === today);
   
@@ -16,10 +19,34 @@ export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records 
   const dayName = dateObj.toLocaleDateString('ar-SA', { weekday: 'long' });
   const formattedDate = dateObj.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' });
 
+  // Logic for Frequent Latecomers (Top 5 with >= 3 lates)
+  const frequentLatecomers = useMemo(() => {
+    const stats: Record<string, { name: string, grade: string, className: string, count: number }> = {};
+    
+    records.forEach(r => {
+      // Use studentId to group uniquely
+      if (!stats[r.studentId]) {
+        stats[r.studentId] = { 
+          name: r.studentName, 
+          grade: r.grade, 
+          className: r.className, 
+          count: 0 
+        };
+      }
+      stats[r.studentId].count += 1;
+    });
+
+    // Filter >= 3 and sort descending
+    return Object.values(stats)
+      .filter(s => s.count >= 3)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }, [records]);
+
   return (
     <div className="p-4 space-y-6 pb-20">
       {/* Header Card */}
-      <div className="fixed md:sticky top-0 z-40 md:z-30 bg-[#1e3a8a] text-white shadow-lg px-4 pt-[env(safe-area-inset-top)] pb-6 transition-all duration-300 rounded-b-[2.5rem] md:rounded-none md:shadow-md w-full md:w-auto left-0 right-0 md:left-auto md:right-auto">
+      <div className="bg-gradient-to-l from-primary to-blue-700 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         
         {/* Background Decorative Circles */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 pointer-events-none"></div>
@@ -73,15 +100,60 @@ export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records 
         </div>
       </div>
 
-      {/* Quick Action Hint */}
-      <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl flex items-start gap-3">
-        <Clock className="text-orange-500 mt-1" size={20} />
-        <div>
-          <h3 className="font-bold text-orange-800">تذكير</h3>
-          <p className="text-sm text-orange-700 leading-relaxed">
-            يرجى التأكد من تسجيل المتأخرين قبل الحصة الأولى لضمان دقة التقارير.
-          </p>
+      {/* Frequent Latecomers Warning Box */}
+      {frequentLatecomers.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-red-200 overflow-hidden animate-fade-in">
+          <div className="bg-red-50 p-4 border-b border-red-100 flex justify-between items-center">
+            <h3 className="font-bold text-red-800 flex items-center gap-2">
+              <AlertTriangle size={20} className="text-red-600" />
+              تنبيه: الأكثر تكراراً
+            </h3>
+            <span className="text-[10px] bg-red-200 text-red-900 px-2 py-1 rounded-full font-bold">
+              إجراء مطلوب
+            </span>
+          </div>
+          
+          <div className="divide-y divide-gray-100">
+            {frequentLatecomers.map((student, idx) => (
+              <div key={idx} className="p-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-700 font-bold text-sm">
+                    {idx + 1}
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-800 text-sm">{student.name}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{student.grade} - {student.className}</p>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-center bg-white border border-red-100 px-3 py-1 rounded-lg shadow-sm min-w-[60px]">
+                   <span className="block font-bold text-red-600 text-lg leading-none">{student.count}</span>
+                   <span className="text-[10px] text-gray-400">مرات</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* TODAY'S TABLE - ACTION CENTER */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 border-b bg-gray-50 flex items-center gap-2">
+           <Clock size={20} className="text-primary"/>
+           <h3 className="font-bold text-gray-800">قائمة المتأخرين اليوم ({todayRecords.length})</h3>
+        </div>
+        {todayRecords.length > 0 ? (
+           <LateTable 
+             records={todayRecords} 
+             onRemove={onRemoveRecord} 
+             onUpdateRecord={onUpdateRecord}
+             managerName={settings.managerName}
+           />
+        ) : (
+          <div className="p-8 text-center text-gray-400">
+            لم يتم تسجيل أي تأخير اليوم
+          </div>
+        )}
       </div>
     </div>
   );

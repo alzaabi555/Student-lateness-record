@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AppSettings, Student, LateRecord } from '../types';
-import { Save, Download, Upload, Trash, Image as ImageIcon, X } from 'lucide-react';
+import { Save, Download, Upload, Trash, Image as ImageIcon, X, Loader2 } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 
 interface SettingsViewProps {
   settings: AppSettings;
@@ -14,23 +17,60 @@ interface SettingsViewProps {
 export const SettingsView: React.FC<SettingsViewProps> = ({ 
   settings, setSettings, students, records, onImport, onClearData 
 }) => {
+  const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = () => {
-    const data = {
-      version: 1,
-      timestamp: new Date().toISOString(),
-      settings,
-      students,
-      records
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `backup_school_records_${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const data = {
+        version: 1,
+        timestamp: new Date().toISOString(),
+        settings,
+        students,
+        records
+      };
+      
+      const fileName = `backup_school_records_${new Date().toISOString().slice(0,10)}.json`;
+      const jsonString = JSON.stringify(data, null, 2);
+
+      if (Capacitor.isNativePlatform()) {
+        // Native (iOS/Android): Write to cache then Share
+        try {
+          const result = await Filesystem.writeFile({
+            path: fileName,
+            data: jsonString,
+            directory: Directory.Cache,
+            encoding: Encoding.UTF8
+          });
+
+          await Share.share({
+            title: 'نسخة احتياطية لسجل الطلاب',
+            text: 'ملف النسخة الاحتياطية لتطبيق سجل المتابعة اليومي',
+            url: result.uri,
+            dialogTitle: 'حفظ النسخة الاحتياطية',
+          });
+        } catch (nativeError) {
+          console.error('Native export failed:', nativeError);
+          alert('تعذر مشاركة الملف. تأكد من صلاحيات التطبيق.');
+        }
+      } else {
+        // Web: Standard Download
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ غير متوقع أثناء التصدير');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,7 +160,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               type="text" 
               value={settings.schoolName}
               onChange={(e) => setSettings({...settings, schoolName: e.target.value})}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-primary outline-none"
+              className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-primary outline-none"
             />
           </div>
           <div>
@@ -129,7 +169,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               type="text" 
               value={settings.managerName}
               onChange={(e) => setSettings({...settings, managerName: e.target.value})}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-primary outline-none"
+              className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-primary outline-none"
             />
           </div>
           <div>
@@ -138,7 +178,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               type="text" 
               value={settings.supervisorName}
               onChange={(e) => setSettings({...settings, supervisorName: e.target.value})}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-primary outline-none"
+              className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-primary outline-none"
             />
           </div>
         </div>
@@ -152,10 +192,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button 
             onClick={handleExport}
-            className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 p-4 rounded-lg hover:bg-blue-100 transition"
+            disabled={isExporting}
+            className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 p-4 rounded-lg hover:bg-blue-100 transition disabled:opacity-50"
           >
-            <Download size={20} />
-            <span>تصدير نسخة احتياطية (JSON)</span>
+            {isExporting ? <Loader2 className="animate-spin" size={20} /> : <Download size={20} />}
+            <span>{isExporting ? 'جاري التصدير...' : 'تصدير نسخة احتياطية'}</span>
           </button>
 
           <label className="flex items-center justify-center gap-2 bg-green-50 text-green-700 border border-green-200 p-4 rounded-lg hover:bg-green-100 transition cursor-pointer">

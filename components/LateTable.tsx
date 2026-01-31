@@ -1,49 +1,131 @@
 import React from 'react';
-import { LateRecord } from '../types';
-import { Trash2 } from 'lucide-react';
+import { LateRecord, ActionType } from '../types';
+import { Trash2, MessageCircle, Clock, CheckSquare, Square } from 'lucide-react';
 
 interface LateTableProps {
   records: LateRecord[];
   onRemove: (id: string) => void;
-  onUpdateNotes: (id: string, notes: string) => void;
+  onUpdateRecord: (id: string, updates: Partial<LateRecord>) => void;
   managerName: string;
 }
 
-export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdateNotes, managerName }) => {
+export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdateRecord, managerName }) => {
   // Ensure we always show at least 20 rows to match the paper style
   const emptyRowsCount = Math.max(0, 20 - records.length);
   const emptyRows = Array.from({ length: emptyRowsCount });
 
+  const getActionLabel = (action?: ActionType) => {
+    switch (action) {
+      case 'WARNING': return 'تنبيه شفوي';
+      case 'PLEDGE': return 'تعهد خطي';
+      case 'CALL': return 'اتصال بالولي';
+      case 'SUMMON': return 'استدعاء ولي أمر';
+      case 'COUNCIL': return 'مجلس نظام';
+      default: return '-';
+    }
+  };
+
+  const handleWhatsApp = (record: LateRecord) => {
+    if (!record.phone) {
+      alert('لا يوجد رقم هاتف لهذا الطالب');
+      return;
+    }
+    const msg = `السلام عليكم ولي أمر الطالب ${record.studentName}، نود إفادتكم بتأخر ابنكم عن الطابور الصباحي اليوم (${record.dateString}). يرجى التنبيه عليه بالالتزام بالوقت.`;
+    const url = `https://wa.me/${record.phone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+  };
+
   return (
     <div className="w-full">
       <div className="overflow-x-auto border-2 border-gray-800 rounded-sm">
-        <table className="w-full min-w-[600px] border-collapse bg-white">
+        <table className="w-full min-w-[700px] border-collapse bg-white">
           <thead className="bg-gray-100">
             <tr>
-              <th className="border border-gray-600 p-2 w-12 text-center font-bold text-gray-800">م</th>
+              <th className="border border-gray-600 p-2 w-10 text-center font-bold text-gray-800">م</th>
               <th className="border border-gray-600 p-2 text-right font-bold text-gray-800">اسم الطالب</th>
-              <th className="border border-gray-600 p-2 w-48 text-center font-bold text-gray-800">الصف</th>
-              <th className="border border-gray-600 p-2 w-1/3 text-center font-bold text-gray-800">ملاحظات (الإجراءات)</th>
-              <th className="border border-gray-600 p-2 w-12 text-center font-bold text-gray-800 no-print">حذف</th>
+              <th className="border border-gray-600 p-2 w-24 text-center font-bold text-gray-800">الصف</th>
+              
+              {/* New Operational Columns */}
+              <th className="border border-gray-600 p-2 w-20 text-center font-bold text-gray-800">الوقت</th>
+              <th className="border border-gray-600 p-2 w-16 text-center font-bold text-gray-800">بعذر؟</th>
+              <th className="border border-gray-600 p-2 w-40 text-center font-bold text-gray-800">الإجراء المتخذ</th>
+              <th className="border border-gray-600 p-2 w-12 text-center font-bold text-gray-800 no-print">تواصل</th>
+              <th className="border border-gray-600 p-2 w-10 text-center font-bold text-gray-800 no-print">حذف</th>
             </tr>
           </thead>
           <tbody>
             {records.map((record, index) => (
-              <tr key={record.id} className="hover:bg-gray-50 h-10">
+              <tr key={record.id} className={`hover:bg-gray-50 h-12 ${record.isExcused ? 'bg-green-50' : ''}`}>
                 <td className="border border-gray-400 text-center font-medium">{index + 1}</td>
-                <td className="border border-gray-400 px-3 text-gray-900 font-medium">{record.studentName}</td>
-                <td className="border border-gray-400 text-center text-gray-700">
-                  {record.grade} {record.className ? `(${record.className})` : ''}
+                
+                <td className="border border-gray-400 px-3 text-gray-900 font-medium">
+                  {record.studentName}
+                  {record.phone && <span className="block text-[10px] text-gray-400 print:hidden">{record.phone}</span>}
                 </td>
-                <td className="border border-gray-400 px-2">
+                
+                <td className="border border-gray-400 text-center text-gray-700 text-sm">
+                  {record.grade} ({record.className})
+                </td>
+                
+                {/* Time Input */}
+                <td className="border border-gray-400 text-center">
                   <input
-                    type="text"
-                    value={record.notes}
-                    onChange={(e) => onUpdateNotes(record.id, e.target.value)}
-                    className="w-full h-full bg-transparent border-none focus:ring-0 text-right text-sm"
-                    placeholder="..."
+                    type="time"
+                    value={record.arrivalTime || ''}
+                    onChange={(e) => onUpdateRecord(record.id, { arrivalTime: e.target.value })}
+                    className="w-full text-center bg-transparent border-none focus:ring-0 text-sm font-mono"
                   />
                 </td>
+
+                {/* Excuse Toggle */}
+                <td className="border border-gray-400 text-center no-print">
+                   <button 
+                     onClick={() => onUpdateRecord(record.id, { isExcused: !record.isExcused })}
+                     className={`p-1 rounded ${record.isExcused ? 'text-green-600' : 'text-gray-300'}`}
+                   >
+                     {record.isExcused ? <CheckSquare size={20}/> : <Square size={20}/>}
+                   </button>
+                </td>
+                {/* Printable Excuse Column */}
+                <td className="border border-gray-400 text-center print-only hidden">
+                  {record.isExcused ? 'نعم' : ''}
+                </td>
+
+                {/* Action Dropdown */}
+                <td className="border border-gray-400 px-1">
+                   {/* Print View: Just Text */}
+                   <span className="print-only hidden text-center w-full">{getActionLabel(record.actionTaken)}</span>
+                   
+                   {/* Web View: Dropdown */}
+                   <select
+                     value={record.actionTaken || 'NONE'}
+                     onChange={(e) => onUpdateRecord(record.id, { actionTaken: e.target.value as ActionType })}
+                     className="w-full bg-transparent border-none text-sm text-center focus:ring-0 cursor-pointer no-print"
+                   >
+                     <option value="NONE" className="text-gray-400">-- اختر --</option>
+                     <option value="WARNING">تنبيه شفوي</option>
+                     <option value="PLEDGE">تعهد خطي</option>
+                     <option value="CALL">اتصال بالولي</option>
+                     <option value="SUMMON">استدعاء ولي أمر</option>
+                     <option value="COUNCIL">مجلس نظام</option>
+                   </select>
+                </td>
+
+                {/* Communication Button */}
+                <td className="border border-gray-400 text-center no-print">
+                  {record.phone ? (
+                    <button 
+                      onClick={() => handleWhatsApp(record)}
+                      className="text-green-500 hover:text-green-700 p-1 rounded transition-colors"
+                      title="مراسلة ولي الأمر"
+                    >
+                      <MessageCircle size={18} />
+                    </button>
+                  ) : (
+                    <span className="text-gray-300">-</span>
+                  )}
+                </td>
+
                 <td className="border border-gray-400 text-center no-print">
                   <button 
                     onClick={() => onRemove(record.id)}
@@ -54,6 +136,7 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
                 </td>
               </tr>
             ))}
+            
             {/* Fill empty rows to maintain A4 look */}
             {emptyRows.map((_, i) => (
               <tr key={`empty-${i}`} className="h-10">
@@ -61,6 +144,9 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
                 <td className="border border-gray-400"></td>
                 <td className="border border-gray-400"></td>
                 <td className="border border-gray-400"></td>
+                <td className="border border-gray-400"></td>
+                <td className="border border-gray-400"></td>
+                <td className="border border-gray-400 no-print"></td>
                 <td className="border border-gray-400 no-print"></td>
               </tr>
             ))}

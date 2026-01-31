@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Student, GradeLevel } from '../types';
-import { Upload, Search, User, UserPlus, Layers, Plus, Trash2, X, School, FileSpreadsheet, Check, AlertTriangle, ChevronDown } from 'lucide-react';
+import { Upload, Search, User, UserPlus, Layers, Plus, Trash2, X, FileSpreadsheet, FileText, Phone } from 'lucide-react';
 import { parseExcelFile } from '../services/excelService';
+import { parseWordFile } from '../services/wordService';
 
 interface StudentsViewProps {
   students: Student[];
@@ -75,13 +76,15 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
     const name = (form.elements.namedItem('studentName') as HTMLInputElement).value;
     const grade = (form.elements.namedItem('studentGrade') as HTMLSelectElement).value;
     const className = (form.elements.namedItem('studentClass') as HTMLSelectElement).value;
+    const phone = (form.elements.namedItem('studentPhone') as HTMLInputElement).value;
 
     if (name && grade) {
       const newStudent: Student = {
         id: `std-${Date.now()}`,
         name,
         grade,
-        className: className || 'بدون'
+        className: className || 'بدون',
+        phone: phone || ''
       };
       setStudents([...students, newStudent]);
       setShowAddModal(false);
@@ -100,12 +103,13 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
     const file = fileInputRef.current?.files?.[0];
     
     if (!file) {
-      alert('يرجى اختيار ملف Excel');
+      alert('يرجى اختيار ملف');
       return;
     }
 
+    // Validation for Manual Mode
     if (importMode === 'MANUAL' && (!importGrade || !importClass)) {
-      alert('يرجى اختيار الصف والفصل لتوزيع الطلاب عليهم');
+      alert('يرجى اختيار الصف والفصل لتوزيع الطلاب عليهم، حيث أن معظم ملفات القوائم لا تحتوي على الصف.');
       return;
     }
 
@@ -117,11 +121,31 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
 
     setLoading(true);
     try {
-      const parsedStudents = await parseExcelFile(file);
+      let parsedStudents: Student[] = [];
+
+      // Determine file type and parse
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        parsedStudents = await parseExcelFile(file);
+      } else if (file.name.endsWith('.docx')) {
+        parsedStudents = await parseWordFile(file);
+      } else {
+        alert('صيغة الملف غير مدعومة. يرجى استخدام Excel (.xlsx) أو Word (.docx)');
+        setLoading(false);
+        return;
+      }
+
+      if (parsedStudents.length === 0) {
+        alert('لم يتم العثور على بيانات. تأكد من أن الملف يحتوي على جدول أو قائمة بالأسماء.');
+        setLoading(false);
+        return;
+      }
+
+      // Apply overrides if in Manual Mode (common for Word docs which act as lists for specific classes)
       const processedStudents = parsedStudents.map(s => {
         if (importMode === 'MANUAL') {
           return { ...s, grade: importGrade, className: importClass };
         }
+        // If Auto, keep existing grade/class if parsed, otherwise fallback to "Unknown" or empty
         return s;
       });
 
@@ -131,7 +155,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
         setStudents([...students, ...processedStudents]);
       }
       
-      alert(`تمت إضافة ${processedStudents.length} طالب.`);
+      alert(`تمت إضافة ${processedStudents.length} طالب بنجاح.`);
       setShowImportModal(false);
       setImportGrade('');
       setImportClass('');
@@ -139,7 +163,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
 
     } catch (err) {
       console.error(err);
-      alert('حدث خطأ أثناء قراءة الملف.');
+      alert('حدث خطأ أثناء قراءة الملف. تأكد من أن الملف ليس تالفاً ويحتوي على جدول واضح.');
     } finally {
       setLoading(false);
     }
@@ -195,7 +219,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
                 name="gradeName"
                 type="text"
                 placeholder="اسم الصف..."
-                className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm"
+                className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none text-sm text-gray-900"
               />
               <button type="submit" className="bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm">
                 إضافة
@@ -240,7 +264,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
                     name="classInput"
                     type="text"
                     placeholder="فصل (أ، 1...)"
-                    className="w-full p-2 text-xs border border-gray-200 bg-gray-50 rounded focus:ring-1 focus:ring-primary outline-none"
+                    className="w-full p-2 text-xs border border-gray-200 bg-gray-50 rounded focus:ring-1 focus:ring-primary outline-none text-gray-900"
                   />
                   <button type="submit" className="text-primary bg-blue-50 px-3 rounded">
                     <Plus size={16} />
@@ -268,11 +292,11 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
                 placeholder="بحث..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full py-2 pr-9 pl-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
+                className="w-full py-2 pr-9 pl-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none text-gray-900 bg-white"
               />
             </div>
             <select 
-              className="w-24 p-2 border rounded-lg bg-gray-50 text-sm focus:ring-2 focus:ring-primary outline-none"
+              className="w-24 p-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:ring-2 focus:ring-primary outline-none"
               value={filterGrade}
               onChange={(e) => setFilterGrade(e.target.value)}
             >
@@ -293,7 +317,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
                 onClick={() => { setImportMethod('APPEND'); setShowImportModal(true); }}
                 className="bg-green-600 text-white py-2 rounded-lg flex justify-center items-center gap-2 text-sm font-bold shadow-sm"
               >
-                <FileSpreadsheet size={16} />
+                <Upload size={16} />
                 استيراد
               </button>
           </div>
@@ -310,12 +334,19 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
                       <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded">{student.className}</span>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => handleDeleteStudent(student.id)}
-                    className="text-gray-300 hover:text-red-500 p-2"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {student.phone && (
+                      <a href={`tel:${student.phone}`} className="text-green-600 bg-green-50 p-2 rounded-full">
+                        <Phone size={16} />
+                      </a>
+                    )}
+                    <button 
+                      onClick={() => handleDeleteStudent(student.id)}
+                      className="text-gray-300 hover:text-red-500 p-2"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (
@@ -335,16 +366,18 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl animate-scale-in">
             <div className="p-4 border-b flex justify-between items-center">
-              <h3 className="font-bold">إضافة طالب</h3>
-              <button onClick={() => setShowAddModal(false)}><X size={20} /></button>
+              <h3 className="font-bold text-gray-900">إضافة طالب</h3>
+              <button onClick={() => setShowAddModal(false)}><X size={20} className="text-gray-500" /></button>
             </div>
             <form onSubmit={handleAddStudent} className="p-4 space-y-3">
-              <input name="studentName" type="text" required placeholder="اسم الطالب" className="w-full p-3 border rounded-lg bg-gray-50 outline-none" />
-              <select name="studentGrade" required className="w-full p-3 border rounded-lg bg-gray-50 outline-none" onChange={(e) => setModalGrade(e.target.value)}>
+              <input name="studentName" type="text" required placeholder="اسم الطالب" className="w-full p-3 border rounded-lg bg-gray-50 outline-none text-gray-900" />
+              <input name="studentPhone" type="tel" placeholder="رقم هاتف الولي (اختياري)" className="w-full p-3 border rounded-lg bg-gray-50 outline-none text-gray-900" />
+              
+              <select name="studentGrade" required className="w-full p-3 border rounded-lg bg-gray-50 outline-none text-gray-900" onChange={(e) => setModalGrade(e.target.value)}>
                 <option value="">اختر الصف...</option>
                 {structure.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
               </select>
-              <select name="studentClass" className="w-full p-3 border rounded-lg bg-gray-50 outline-none">
+              <select name="studentClass" className="w-full p-3 border rounded-lg bg-gray-50 outline-none text-gray-900">
                 <option value="">اختر الفصل...</option>
                 {modalGrade && structure.find(g => g.name === modalGrade)?.classes.map(c => <option key={c} value={c}>{c}</option>)}
                 <option value="1">1</option><option value="2">2</option><option value="أ">أ</option><option value="ب">ب</option>
@@ -360,7 +393,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-y-auto max-h-[90vh]">
             <div className="p-4 border-b bg-green-50 flex justify-between items-center">
-              <h3 className="font-bold text-green-800 flex gap-2"><FileSpreadsheet size={18}/> استيراد Excel</h3>
+              <h3 className="font-bold text-green-800 flex gap-2"><Upload size={18}/> استيراد بيانات الطلاب</h3>
               <button onClick={() => setShowImportModal(false)}><X size={20}/></button>
             </div>
             
@@ -368,9 +401,9 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
               {/* Method */}
               <div className="bg-gray-50 p-3 rounded-lg border text-sm">
                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="flex items-center gap-2 cursor-pointer text-gray-800">
                       <input type="radio" name="importMethod" checked={importMethod === 'APPEND'} onChange={() => setImportMethod('APPEND')} />
-                      <span>إضافة</span>
+                      <span>إضافة للقائمة</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer text-red-600">
                       <input type="radio" name="importMethod" checked={importMethod === 'REPLACE'} onChange={() => setImportMethod('REPLACE')} />
@@ -382,35 +415,47 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
               {/* Mode */}
               <div className="flex bg-gray-100 p-1 rounded-lg">
                 <button type="button" onClick={() => setImportMode('MANUAL')} className={`flex-1 py-2 text-xs font-bold rounded ${importMode === 'MANUAL' ? 'bg-white shadow text-primary' : 'text-gray-500'}`}>تحديد الصف يدوياً</button>
-                <button type="button" onClick={() => setImportMode('AUTO')} className={`flex-1 py-2 text-xs font-bold rounded ${importMode === 'AUTO' ? 'bg-white shadow text-primary' : 'text-gray-500'}`}>تلقائي</button>
+                <button type="button" onClick={() => setImportMode('AUTO')} className={`flex-1 py-2 text-xs font-bold rounded ${importMode === 'AUTO' ? 'bg-white shadow text-primary' : 'text-gray-500'}`}>تلقائي (من الملف)</button>
               </div>
 
               {importMode === 'MANUAL' && (
                 <div className="space-y-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
-                   <select value={importGrade} onChange={(e) => setImportGrade(e.target.value)} className="w-full p-2 border rounded bg-white text-sm">
+                   <p className="text-xs text-blue-800 mb-2">يفضل استخدام هذا الخيار عند استيراد قائمة فصل واحد (Excel أو Word)</p>
+                   <select value={importGrade} onChange={(e) => setImportGrade(e.target.value)} className="w-full p-2 border rounded bg-white text-sm text-gray-900">
                      <option value="">اختر الصف...</option>
                      {structure.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
                    </select>
-                   <select value={importClass} onChange={(e) => setImportClass(e.target.value)} className="w-full p-2 border rounded bg-white text-sm">
+                   <select value={importClass} onChange={(e) => setImportClass(e.target.value)} className="w-full p-2 border rounded bg-white text-sm text-gray-900">
                      <option value="">اختر الشعبة...</option>
                      {importGrade && structure.find(g => g.name === importGrade)?.classes.map(c => <option key={c} value={c}>{c}</option>)}
                    </select>
                 </div>
               )}
 
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                <input type="file" ref={fileInputRef} accept=".xlsx, .xls" className="hidden" id="file-upload" onChange={(e) => {
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors">
+                <input type="file" ref={fileInputRef} accept=".xlsx, .xls, .docx" className="hidden" id="file-upload" onChange={(e) => {
                    // simple feedback
-                   if(e.target.files?.[0]) alert(`تم اختيار: ${e.target.files[0].name}`);
+                   if(e.target.files?.[0]) {
+                     const f = e.target.files[0];
+                     alert(`تم اختيار: ${f.name} (${(f.size/1024).toFixed(1)} KB)`);
+                   }
                 }}/>
-                <label htmlFor="file-upload" className="flex flex-col items-center gap-2 cursor-pointer">
-                  <Upload size={24} className="text-gray-400" />
-                  <span className="text-sm text-gray-600">اضغط لاختيار الملف</span>
+                <label htmlFor="file-upload" className="flex flex-col items-center gap-3 cursor-pointer">
+                  <div className="flex gap-2">
+                    <FileSpreadsheet size={32} className="text-green-600" />
+                    <FileText size={32} className="text-blue-600" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-700">اضغط لاختيار ملف Excel أو Word</span>
+                  <span className="text-xs text-gray-400">يدعم الجداول وقوائم الأسماء مع الأرقام</span>
                 </label>
               </div>
+              
+              <div className="text-xs text-gray-500 bg-yellow-50 p-2 rounded">
+                 <strong>نصيحة:</strong> للحصول على أفضل النتائج، تأكد من أن الملف يحتوي على عمود "الاسم" وعمود "الهاتف" (اختياري).
+              </div>
 
-              <button type="submit" disabled={loading} className="w-full bg-green-600 text-white py-3 rounded-lg font-bold">
-                {loading ? '...' : 'بدء الاستيراد'}
+              <button type="submit" disabled={loading} className="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition">
+                {loading ? 'جاري المعالجة...' : 'بدء الاستيراد'}
               </button>
             </form>
           </div>
