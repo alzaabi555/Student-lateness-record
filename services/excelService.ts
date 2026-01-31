@@ -18,12 +18,17 @@ export const parseExcelFile = async (file: File): Promise<Student[]> => {
           const name = row['الاسم'] || row['Name'] || row['اسم الطالب'] || 'غير معروف';
           const grade = row['الصف'] || row['Grade'] || row['المرحلة'] || '';
           const className = row['الفصل'] || row['Class'] || row['الشعبة'] || '';
+          
+          // Try to find phone number
+          let phone = row['الهاتف'] || row['رقم الهاتف'] || row['الجوال'] || row['Phone'] || row['Mobile'] || '';
+          phone = String(phone).trim();
 
           return {
             id: `student-${Date.now()}-${index}`,
             name: String(name).trim(),
             grade: String(grade).trim(),
             className: String(className).trim(),
+            phone: phone
           };
         }).filter(s => s.name !== 'غير معروف');
 
