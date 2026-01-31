@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Student } from '../types.ts';
+import { Student } from '../types';
 import { UserPlus, Filter } from 'lucide-react';
 
 interface StudentSelectorProps {

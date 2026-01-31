@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { Student, GradeLevel } from '../types.ts';
+import { Student, GradeLevel } from '../types';
 import { Upload, Search, User, UserPlus, Layers, Plus, Trash2, X, FileSpreadsheet, FileText, Phone } from 'lucide-react';
-import { parseExcelFile } from '../services/excelService.ts';
-import { parseWordFile } from '../services/wordService.ts';
+import { parseExcelFile } from '../services/excelService';
+import { parseWordFile } from '../services/wordService';
 
 interface StudentsViewProps {
   students: Student[];
@@ -63,7 +63,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
   const handleDeleteClass = (gradeId: string, className: string) => {
     setStructure(structure.map(g => {
       if (g.id === gradeId) {
-        return { ...g, classes: g.classes.filter(c => c !== className) };
+        return { ...g, classes: g.classes.filter((c: string) => c !== className) };
       }
       return g;
     }));
