@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { AppSettings, LateRecord, Student } from '../types';
+import { AppSettings, LateRecord, Student } from '../types.ts';
 import { Clock, Users, AlertCircle, AlertTriangle } from 'lucide-react';
 import { LateTable } from './LateTable';
 
@@ -137,11 +137,20 @@ export const HomeView: React.FC<HomeViewProps> = ({ settings, students, records,
       )}
 
       {/* TODAY'S TABLE - ACTION CENTER */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b bg-gray-50 flex items-center gap-2">
+      {/* We add id="printable-area" here so if user presses print from Home, this is what prints */}
+      <div id="printable-area" className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 border-b bg-gray-50 flex items-center gap-2 no-print">
            <Clock size={20} className="text-primary"/>
            <h3 className="font-bold text-gray-800">قائمة المتأخرين اليوم ({todayRecords.length})</h3>
         </div>
+
+        {/* Hidden Header only for Print */}
+        <div className="print-only hidden p-4 text-center border-b mb-4">
+           <h1 className="text-2xl font-bold mb-1">سجل المتأخرين اليومي</h1>
+           <h2 className="text-xl text-gray-700 mb-2">{settings.schoolName}</h2>
+           <p className="text-sm text-gray-500">{dayName}، {formattedDate}</p>
+        </div>
+
         {todayRecords.length > 0 ? (
            <LateTable 
              records={todayRecords} 

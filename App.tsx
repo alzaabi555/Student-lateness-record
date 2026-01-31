@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Student, LateRecord, AppSettings, ViewState, GradeLevel } from './types';
+import { Student, LateRecord, AppSettings, ViewState, GradeLevel } from './types.ts';
 import { BottomNav } from './components/BottomNav';
 import { HomeView } from './components/HomeView';
 import { RegisterView } from './components/RegisterView';

@@ -1,6 +1,6 @@
 import React from 'react';
-import { LateRecord, ActionType } from '../types';
-import { Trash2, MessageCircle, Clock, CheckSquare, Square } from 'lucide-react';
+import { LateRecord, ActionType } from '../types.ts';
+import { Trash2, MessageCircle, Clock, CheckSquare, Square, AlertCircle } from 'lucide-react';
 
 interface LateTableProps {
   records: LateRecord[];
@@ -27,11 +27,31 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
 
   const handleWhatsApp = (record: LateRecord) => {
     if (!record.phone) {
-      alert('لا يوجد رقم هاتف لهذا الطالب');
+      alert(`عفواً، لا يوجد رقم هاتف مسجل للطالب: ${record.studentName}\nيرجى تحديث بيانات الطالب من قائمة "الطلاب".`);
       return;
     }
-    const msg = `السلام عليكم ولي أمر الطالب ${record.studentName}، نود إفادتكم بتأخر ابنكم عن الطابور الصباحي اليوم (${record.dateString}). يرجى التنبيه عليه بالالتزام بالوقت.`;
-    const url = `https://wa.me/${record.phone}?text=${encodeURIComponent(msg)}`;
+
+    // --- منطق تحسين رقم الهاتف ---
+    // 1. إزالة أي مسافات أو شرطات أو أقواس
+    let phone = record.phone.replace(/\D/g, '');
+
+    // 2. معالجة الأرقام المحلية (سلطنة عمان كمثال افتراضي بناءً على الترويسة)
+    // إذا كان الرقم 8 خانات (مثلاً 99999999)، نضيف المفتاح 968
+    if (phone.length === 8 && (phone.startsWith('9') || phone.startsWith('7'))) {
+        phone = '968' + phone;
+    }
+    // إذا كان يبدأ بـ 00، نحذفه
+    else if (phone.startsWith('00')) {
+        phone = phone.substring(2);
+    }
+    // إذا كان يبدأ بـ 0 محلي (مثل السعودية/مصر)، نحذف الصفر (يحتاج مفتاح دولة، هنا نتركه كما هو أو يمكن تخصيصه)
+    else if (phone.startsWith('0')) {
+        phone = phone.substring(1); 
+    }
+
+    const msg = `السلام عليكم ولي أمر الطالب/ة (${record.studentName}) المحترم،\nنود إشعاركم بتأخر ابنكم عن الطابور الصباحي اليوم ${record.dateString} (${record.arrivalTime}).\nنرجو التنبيه عليه بالالتزام بالوقت المحدد.\nإدارة المدرسة`;
+    
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };
 
@@ -60,7 +80,8 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
                 
                 <td className="border border-gray-400 px-3 text-gray-900 font-medium">
                   {record.studentName}
-                  {record.phone && <span className="block text-[10px] text-gray-400 print:hidden">{record.phone}</span>}
+                  {/* إظهار الرقم أسفل الاسم للمشرف للتأكد */}
+                  {record.phone && <span className="block text-[10px] text-gray-400 font-mono tracking-wider print:hidden">{record.phone}</span>}
                 </td>
                 
                 <td className="border border-gray-400 text-center text-gray-700 text-sm">
@@ -111,22 +132,22 @@ export const LateTable: React.FC<LateTableProps> = ({ records, onRemove, onUpdat
                    </select>
                 </td>
 
-                {/* Communication Button */}
-                <td className="border border-gray-400 text-center no-print">
-                  {record.phone ? (
-                    <button 
-                      onClick={() => handleWhatsApp(record)}
-                      className="text-green-500 hover:text-green-700 p-1 rounded transition-colors"
-                      title="مراسلة ولي الأمر"
-                    >
-                      <MessageCircle size={18} />
-                    </button>
-                  ) : (
-                    <span className="text-gray-300">-</span>
-                  )}
+                {/* Communication Button - Always visible now */}
+                <td className="border border-gray-400 text-center no-print align-middle">
+                  <button 
+                    onClick={() => handleWhatsApp(record)}
+                    className={`p-2 rounded transition-colors flex items-center justify-center mx-auto ${
+                      record.phone 
+                        ? 'text-green-500 hover:bg-green-50 hover:text-green-700' 
+                        : 'text-gray-300 hover:text-gray-500'
+                    }`}
+                    title={record.phone ? "مراسلة ولي الأمر" : "لا يوجد رقم هاتف"}
+                  >
+                    <MessageCircle size={20} />
+                  </button>
                 </td>
 
-                <td className="border border-gray-400 text-center no-print">
+                <td className="border border-gray-400 text-center no-print align-middle">
                   <button 
                     onClick={() => onRemove(record.id)}
                     className="text-red-500 hover:text-red-700 p-1 rounded transition-colors"

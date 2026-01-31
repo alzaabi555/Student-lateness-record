@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { LateRecord, AppSettings } from '../types';
-import { Printer, CalendarDays, Calendar, Trash2, AlertTriangle, Filter } from 'lucide-react';
+import { LateRecord, AppSettings } from '../types.ts';
+import { Printer, CalendarDays, Calendar, Trash2, Filter } from 'lucide-react';
 
 interface ReportsViewProps {
   records: LateRecord[];
@@ -177,21 +177,21 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ records, settings, onD
         </div>
       </div>
 
-      {/* Printable Area */}
-      <div className="bg-white print:shadow-none print:w-full print:m-0 print:p-0">
+      {/* Printable Area - ID used by CSS to show ONLY this div on print */}
+      <div id="printable-area" className="bg-white">
         
         {/* Print Header */}
         <div className="text-center border-b-2 border-gray-800 pb-4 mb-4">
-          <div className="flex justify-between items-center px-4 mb-2 print:flex hidden">
+          <div className="flex justify-between items-center px-4 mb-2">
              <div className="text-right">
                 <p className="font-bold">سلطنة عمان</p>
                 <p>وزارة التربية والتعليم</p>
              </div>
              {settings.logoDataUrl && (
-               <img src={settings.logoDataUrl} alt="Logo" className="h-20 object-contain" />
+               <img src={settings.logoDataUrl} alt="Logo" className="h-20 object-contain mx-auto" />
              )}
              <div className="text-left">
-                <p>{new Date().toLocaleDateString('ar-SA')}</p>
+                <p className="font-mono" dir="ltr">{new Date().toLocaleDateString('en-GB')}</p>
              </div>
           </div>
           
@@ -201,10 +201,10 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ records, settings, onD
 
         {/* ===================== FREQUENT TABLE ===================== */}
         {reportType === 'FREQUENT' ? (
-          <div className="overflow-x-auto print:overflow-visible">
+          <div className="w-full">
             <table className="w-full border-collapse text-xs md:text-sm">
               <thead>
-                <tr className="bg-gray-100 print:bg-gray-200">
+                <tr className="bg-gray-100">
                   <th className="border border-gray-400 p-2 text-center w-10">#</th>
                   <th className="border border-gray-400 p-2 text-right">الاسم الثلاثي</th>
                   <th className="border border-gray-400 p-2 text-center w-24">الصف/الفصل</th>
@@ -215,12 +215,12 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ records, settings, onD
               <tbody>
                 {frequentStudents.length > 0 ? (
                   frequentStudents.map((student, index) => (
-                    <tr key={index} className="hover:bg-gray-50 print:hover:bg-transparent">
+                    <tr key={index}>
                       <td className="border border-gray-400 p-2 text-center font-bold">{index + 1}</td>
                       <td className="border border-gray-400 p-2 font-medium">{student.studentName}</td>
                       <td className="border border-gray-400 p-2 text-center">{student.grade} - {student.className}</td>
                       <td className="border border-gray-400 p-2 text-center font-bold text-red-700 bg-red-50">{student.count}</td>
-                      <td className="border border-gray-400 p-2 text-xs text-gray-600 leading-relaxed">
+                      <td className="border border-gray-400 p-2 text-xs text-gray-600 leading-relaxed break-words whitespace-normal">
                         {student.dates.join('، ')}
                       </td>
                     </tr>
@@ -237,10 +237,10 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ records, settings, onD
           </div>
         ) : (
           /* ===================== DAILY / MONTHLY TABLE ===================== */
-          <div className="overflow-x-auto print:overflow-visible">
+          <div className="w-full">
             <table className="w-full border-collapse text-xs md:text-sm">
               <thead>
-                <tr className="bg-gray-100 print:bg-gray-200">
+                <tr className="bg-gray-100">
                   <th className="border border-gray-400 p-2 text-center w-10">#</th>
                   {reportType === 'MONTHLY' && <th className="border border-gray-400 p-2 text-center w-24">التاريخ</th>}
                   <th className="border border-gray-400 p-2 text-right">الاسم الثلاثي</th>
@@ -252,7 +252,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ records, settings, onD
               <tbody>
                 {filteredRecords.length > 0 ? (
                   filteredRecords.map((record, index) => (
-                    <tr key={record.id} className="hover:bg-gray-50 print:hover:bg-transparent">
+                    <tr key={record.id}>
                       <td className="border border-gray-400 p-2 text-center">{index + 1}</td>
                       {reportType === 'MONTHLY' && <td className="border border-gray-400 p-2 text-center whitespace-nowrap">{record.dateString}</td>}
                       <td className="border border-gray-400 p-2 font-medium">{record.studentName}</td>
@@ -281,7 +281,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ records, settings, onD
         )}
 
         {/* Print Footer */}
-        <div className="mt-10 flex justify-between items-end print:flex hidden text-sm pt-8">
+        <div className="mt-10 flex justify-between items-end pt-8">
            <div className="text-center w-1/3">
              <p className="font-bold mb-8">مشرف السجل</p>
              <p className="text-gray-800">{settings.supervisorName}</p>
