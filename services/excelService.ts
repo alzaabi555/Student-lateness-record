@@ -1,5 +1,5 @@
 import { read, utils } from 'xlsx';
-import { Student } from '../types.ts';
+import { Student } from '../types';
 
 export const parseExcelFile = async (file: File): Promise<Student[]> => {
   return new Promise((resolve, reject) => {

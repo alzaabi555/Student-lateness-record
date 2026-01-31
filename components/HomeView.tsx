@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { AppSettings, LateRecord, Student } from '../types.ts';
+import { AppSettings, LateRecord, Student } from '../types';
 import { Clock, Users, AlertCircle, AlertTriangle } from 'lucide-react';
-import { LateTable } from './LateTable.tsx';
+import { LateTable } from './LateTable';
 
 interface HomeViewProps {
   settings: AppSettings;
