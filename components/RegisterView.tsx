@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Student, GradeLevel } from '../types';
+import { Student, GradeLevel } from '../types.ts';
 import { ChevronRight, CheckCircle, Search, Save, AlertCircle, X, Users } from 'lucide-react';
 
 interface RegisterViewProps {

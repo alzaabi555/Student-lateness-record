@@ -1,5 +1,5 @@
 import React from 'react';
-import { LateRecord, ActionType } from '../types';
+import { LateRecord, ActionType } from '../types.ts';
 import { Trash2, MessageCircle, Clock, CheckSquare, Square, AlertCircle } from 'lucide-react';
 
 interface LateTableProps {
