@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { LateRecord, AppSettings } from '../types';
+import { LateRecord, AppSettings } from '../types.ts';
 import { Printer, CalendarDays, Calendar, Trash2, Filter } from 'lucide-react';
 
 interface ReportsViewProps {

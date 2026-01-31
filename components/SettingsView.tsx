@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppSettings, Student, LateRecord } from '../types';
+import { AppSettings, Student, LateRecord } from '../types.ts';
 import { Save, Download, Upload, Trash, Image as ImageIcon, X, Loader2 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Share } from '@capacitor/share';

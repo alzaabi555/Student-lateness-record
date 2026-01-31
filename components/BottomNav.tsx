@@ -1,6 +1,6 @@
 import React from 'react';
 import { Home, Users, ClipboardList, FileText, Settings } from 'lucide-react';
-import { ViewState } from '../types';
+import { ViewState } from '../types.ts';
 
 interface BottomNavProps {
   currentView: ViewState;
