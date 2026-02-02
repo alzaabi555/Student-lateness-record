@@ -16,23 +16,19 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
   const [searchTerm, setSearchTerm] = useState('');
   const [filterGrade, setFilterGrade] = useState('');
   
-  // Modals State
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   
   const [loading, setLoading] = useState(false);
   
-  // State for Add Single Student
   const [modalGrade, setModalGrade] = useState('');
 
-  // State for Import Modal
   const [importMode, setImportMode] = useState<'AUTO' | 'MANUAL'>('MANUAL');
   const [importMethod, setImportMethod] = useState<'APPEND' | 'REPLACE'>('APPEND');
   const [importGrade, setImportGrade] = useState('');
   const [importClass, setImportClass] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // --- Handlers for Structure ---
   const handleAddGrade = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -46,13 +42,13 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
 
   const handleDeleteGrade = (id: string) => {
     if (confirm('هل أنت متأكد من حذف هذا الصف؟')) {
-      setStructure(structure.filter(g => g.id !== id));
+      setStructure(structure.filter((g) => g.id !== id));
     }
   };
 
   const handleAddClass = (gradeId: string, className: string) => {
     if (!className.trim()) return;
-    setStructure(structure.map(g => {
+    setStructure(structure.map((g) => {
       if (g.id === gradeId && !g.classes.includes(className)) {
         return { ...g, classes: [...g.classes, className] };
       }
@@ -61,15 +57,14 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
   };
 
   const handleDeleteClass = (gradeId: string, className: string) => {
-    setStructure(structure.map(g => {
+    setStructure(structure.map((g) => {
       if (g.id === gradeId) {
-        return { ...g, classes: g.classes.filter(c => c !== className) };
+        return { ...g, classes: g.classes.filter((c: string) => c !== className) };
       }
       return g;
     }));
   };
 
-  // --- Handlers for Students ---
   const handleAddStudent = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -94,7 +89,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
 
   const handleDeleteStudent = (id: string) => {
     if (confirm('حذف هذا الطالب؟')) {
-      setStudents(students.filter(s => s.id !== id));
+      setStudents(students.filter((s) => s.id !== id));
     }
   };
 
@@ -107,7 +102,6 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
       return;
     }
 
-    // Validation for Manual Mode
     if (importMode === 'MANUAL' && (!importGrade || !importClass)) {
       alert('يرجى اختيار الصف والفصل لتوزيع الطلاب عليهم، حيث أن معظم ملفات القوائم لا تحتوي على الصف.');
       return;
@@ -123,7 +117,6 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
     try {
       let parsedStudents: Student[] = [];
 
-      // Determine file type and parse
       if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
         parsedStudents = await parseExcelFile(file);
       } else if (file.name.endsWith('.docx')) {
@@ -140,12 +133,10 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
         return;
       }
 
-      // Apply overrides if in Manual Mode (common for Word docs which act as lists for specific classes)
-      const processedStudents = parsedStudents.map(s => {
+      const processedStudents = parsedStudents.map((s) => {
         if (importMode === 'MANUAL') {
           return { ...s, grade: importGrade, className: importClass };
         }
-        // If Auto, keep existing grade/class if parsed, otherwise fallback to "Unknown" or empty
         return s;
       });
 
@@ -169,8 +160,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
     }
   };
 
-  // Filtering
-  const filteredStudents = students.filter(s => {
+  const filteredStudents = students.filter((s) => {
     const matchSearch = s.name.includes(searchTerm);
     const matchGrade = filterGrade ? s.grade === filterGrade : true;
     return matchSearch && matchGrade;
@@ -179,7 +169,6 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
   return (
     <div className="p-4 space-y-4 pb-24">
       
-      {/* Header & Tabs */}
       <div className="flex flex-col gap-4">
         <h2 className="text-xl font-bold text-gray-800">إدارة الطلاب ({students.length})</h2>
         
@@ -205,10 +194,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
         </div>
       </div>
 
-      {/* ==================== STRUCTURE TAB ==================== */}
       {activeTab === 'STRUCTURE' && (
         <div className="space-y-4 animate-fade-in">
-          {/* Add Grade Form */}
           <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
             <h3 className="font-bold text-sm mb-3 text-primary flex items-center gap-2">
               <Plus size={16} />
@@ -227,9 +214,8 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
             </form>
           </div>
 
-          {/* Grades List */}
           <div className="space-y-3">
-            {structure.map(grade => (
+            {structure.map((grade) => (
               <div key={grade.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                 <div className="flex justify-between items-center mb-3 border-b pb-2">
                   <h4 className="font-bold text-gray-800">{grade.name}</h4>
@@ -239,7 +225,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {grade.classes.map((cls: string) => (
+                  {grade.classes.map((cls) => (
                     <span key={cls} className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold border border-blue-100">
                       {cls}
                       <button onClick={() => handleDeleteClass(grade.id, cls)} className="text-blue-400 hover:text-red-500">
@@ -279,11 +265,9 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
         </div>
       )}
 
-      {/* ==================== STUDENTS TAB ==================== */}
       {activeTab === 'LIST' && (
         <div className="space-y-3 animate-fade-in">
           
-          {/* Actions & Filters */}
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute right-3 top-2.5 text-gray-400" size={16} />
@@ -301,7 +285,7 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
               onChange={(e) => setFilterGrade(e.target.value)}
             >
               <option value="">الكل</option>
-              {structure.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
+              {structure.map((g) => <option key={g.id} value={g.name}>{g.name}</option>)}
             </select>
           </div>
 
@@ -322,7 +306,6 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
               </button>
           </div>
 
-          {/* Mobile Card List (No Table) */}
           <div className="space-y-2">
             {filteredStudents.length > 0 ? (
               filteredStudents.slice(0, 50).map((student) => (
@@ -361,7 +344,6 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
         </div>
       )}
 
-      {/* ==================== ADD STUDENT MODAL ==================== */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl animate-scale-in">
@@ -375,11 +357,11 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
               
               <select name="studentGrade" required className="w-full p-3 border rounded-lg bg-gray-50 outline-none text-gray-900" onChange={(e) => setModalGrade(e.target.value)}>
                 <option value="">اختر الصف...</option>
-                {structure.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
+                {structure.map((g) => <option key={g.id} value={g.name}>{g.name}</option>)}
               </select>
               <select name="studentClass" className="w-full p-3 border rounded-lg bg-gray-50 outline-none text-gray-900">
                 <option value="">اختر الفصل...</option>
-                {modalGrade && structure.find(g => g.name === modalGrade)?.classes.map((c: string) => <option key={c} value={c}>{c}</option>)}
+                {modalGrade && structure.find((g) => g.name === modalGrade)?.classes.map((c: string) => <option key={c} value={c}>{c}</option>)}
                 <option value="1">1</option><option value="2">2</option><option value="أ">أ</option><option value="ب">ب</option>
               </select>
               <button type="submit" className="w-full bg-primary text-white py-3 rounded-lg font-bold">حفظ</button>
@@ -388,7 +370,6 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
         </div>
       )}
 
-      {/* ==================== IMPORT MODAL ==================== */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-y-auto max-h-[90vh]">
@@ -398,7 +379,6 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
             </div>
             
             <form onSubmit={handleImportSubmit} className="p-4 space-y-4">
-              {/* Method */}
               <div className="bg-gray-50 p-3 rounded-lg border text-sm">
                  <div className="flex gap-4">
                     <label className="flex items-center gap-2 cursor-pointer text-gray-800">
@@ -412,7 +392,6 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
                  </div>
               </div>
 
-              {/* Mode */}
               <div className="flex bg-gray-100 p-1 rounded-lg">
                 <button type="button" onClick={() => setImportMode('MANUAL')} className={`flex-1 py-2 text-xs font-bold rounded ${importMode === 'MANUAL' ? 'bg-white shadow text-primary' : 'text-gray-500'}`}>تحديد الصف يدوياً</button>
                 <button type="button" onClick={() => setImportMode('AUTO')} className={`flex-1 py-2 text-xs font-bold rounded ${importMode === 'AUTO' ? 'bg-white shadow text-primary' : 'text-gray-500'}`}>تلقائي (من الملف)</button>
@@ -423,18 +402,17 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, setStudent
                    <p className="text-xs text-blue-800 mb-2">يفضل استخدام هذا الخيار عند استيراد قائمة فصل واحد (Excel أو Word)</p>
                    <select value={importGrade} onChange={(e) => setImportGrade(e.target.value)} className="w-full p-2 border rounded bg-white text-sm text-gray-900">
                      <option value="">اختر الصف...</option>
-                     {structure.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
+                     {structure.map((g) => <option key={g.id} value={g.name}>{g.name}</option>)}
                    </select>
                    <select value={importClass} onChange={(e) => setImportClass(e.target.value)} className="w-full p-2 border rounded bg-white text-sm text-gray-900">
                      <option value="">اختر الشعبة...</option>
-                     {importGrade && structure.find(g => g.name === importGrade)?.classes.map((c: string) => <option key={c} value={c}>{c}</option>)}
+                     {importGrade && structure.find((g) => g.name === importGrade)?.classes.map((c: string) => <option key={c} value={c}>{c}</option>)}
                    </select>
                 </div>
               )}
 
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors">
                 <input type="file" ref={fileInputRef} accept=".xlsx, .xls, .docx" className="hidden" id="file-upload" onChange={(e) => {
-                   // simple feedback
                    if(e.target.files?.[0]) {
                      const f = e.target.files[0];
                      alert(`تم اختيار: ${f.name} (${(f.size/1024).toFixed(1)} KB)`);
