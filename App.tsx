@@ -10,7 +10,7 @@ import { SettingsView } from './components/SettingsView';
 const DEFAULT_SETTINGS: AppSettings = {
   schoolName: 'مدرسة الإبداع للتعليم الأساسي',
   managerName: 'سلطان الزيدي',
-  supervisorName: 'محمد البادي'
+  supervisorName: 'أحمد المحمدي'
 };
 
 const App: React.FC = () => {
