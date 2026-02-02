@@ -11,3 +11,6 @@ declare module 'mammoth' {
   export function convertToHtml(input: MammothInput): Promise<MammothResult>;
   export function extractRawText(input: MammothInput): Promise<MammothResult>;
 }
+
+declare module 'html2canvas';
+declare module 'jspdf';
